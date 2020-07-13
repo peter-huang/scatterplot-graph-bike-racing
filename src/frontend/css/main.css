@@ -20,4 +20,25 @@ body {
   text-decoration: none;
   color: #d00000;
 }
+
+#scattergraph-container {
+  position: relative;
+  border: 5px purple solid;
+}
+
+#scattergraph #title {
+  font-size: 2em;
+  font-weight: bold;
+  text-align: center;
+}
+
+#scattergraph #subtitle {
+  font-size: 0.75em !important;
+  font-weight: normal !important;
+  text-align: center;
+}
+
+#scattergraph svg {
+  border: 5px blue solid;
+}
 /*# sourceMappingURL=main.css.map */

@@ -74,3 +74,26 @@ body {
     color: #d00000;
   }
 }
+
+#scattergraph-container {
+  position: relative;
+  border: 5px purple solid;
+}
+
+#scattergraph {
+  #title {
+    font-size: 2em;
+    font-weight: bold;
+    text-align: center;
+  }
+
+  #subtitle {
+    font-size: 0.75em !important;
+    font-weight: normal !important;
+    text-align: center;
+  }
+
+  svg {
+    border: 5px blue solid;
+  }
+}

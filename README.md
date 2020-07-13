@@ -2,7 +2,7 @@
 
 A React-D3.js scatterplot graph application completed for the freecodecamp data visualization curriculum. I can use any mix of HTML, JavaScript, CSS, Bootstrap, SASS, React, Redux, D3.js, and jQuery to complete this project.
 
-**Final Project:** [https://peterhuang.net/projects/bar-chart-gdp/](https://peterhuang.net/projects/bar-chart-gdp/)
+**Final Project:** [https://peterhuang.net/projects/scatterplot-graph-bike-racing/](https://peterhuang.net/projects/scatterplot-graph-bike-racing/)
 
 **User Story #1:** Shows the doping allegations of bike races up the Alpe d'Huez from a remote JSON source file.
 
