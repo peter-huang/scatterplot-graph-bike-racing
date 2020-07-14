@@ -25,7 +25,23 @@ function App() {
       if (req.readyState == 4 && req.status == 200) {
         const bikedData = JSON.parse(req.responseText);
 
-        setBikeRaceData(() => bikedData);
+        let newData = [];
+
+        bikedData.forEach((e) => {
+          newData.push({
+            Time: e.Time,
+            Place: e.Place,
+            Seconds: e.Seconds,
+            Name: e.Name,
+            Year: e.Year,
+            Nationality: e.Nationality,
+            Doping: e.Doping,
+            URL: e.URL,
+          });
+        });
+        console.log(newData);
+
+        setBikeRaceData(() => newData);
       }
     };
 
@@ -68,6 +84,8 @@ function ScatterPlot({ data }) {
     const width = 700;
     const height = 500;
     const padding = 25;
+    const xFactor = 5;
+    const radius = 2;
 
     d3.select("#scattergraph")
       .append("div")
@@ -87,23 +105,49 @@ function ScatterPlot({ data }) {
     // scales
     const xScale = d3.scaleLinear();
     xScale.domain([
-      d3.min(bikedata, (d) => d.Year),
-      d3.max(bikedata, (d) => d.Year),
+      d3.min(bikedata, (d) => d.Year - xFactor),
+      d3.max(bikedata, (d) => d.Year + xFactor),
     ]);
     xScale.range([padding, width - padding]);
 
     const yScale = d3.scaleLinear();
     yScale.domain([
-      d3.min(bikedata, (d) => parseInt(d.Time)),
-      d3.max(bikedata, (d) => parseInt(d.Time)),
+      d3.min(bikedata, (d) => parseFloat(d.Time)),
+      d3.max(bikedata, (d) => parseFloat(d.Time)),
     ]);
     yScale.range([height - padding, padding]);
 
-    svg.selectAll("circle").append(bikedata).enter().append("circle");
+    svg
+      .selectAll("circle")
+      .data(bikedata)
+      .enter()
+      .append("circle")
+      .attr("class", "dot")
+      .attr("cx", (d) => xScale(d.Year))
+      .attr("cy", (d) => yScale(parseFloat(d.Time)))
+      .attr("r", (d) => radius);
 
-    // axis
-    const xAxis = d3.axisBottom(xScale);
-    const yAxis = d3.axisLeft(yScale);
+    // x-axis
+    const xAxis = d3.axisBottom(xScale).tickFormat(d3.format("d"));
+    svg
+      .append("g")
+      .attr("id", "x-axis")
+      .attr(
+        "transform",
+        "translate(" + padding + "," + (height - 2 * padding) + ")"
+      )
+      .call(xAxis);
+
+    // y-axis
+    const yAxis = d3.axisLeft(yScale).tickFormat(d3.format(".2f"));
+    svg
+      .append("g")
+      .attr("id", "y-axis")
+      .attr(
+        "transform",
+        "translate(" + 2 * padding + "  ," + -1 * padding + ")"
+      )
+      .call(yAxis);
   };
 
   return (

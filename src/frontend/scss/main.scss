@@ -81,6 +81,16 @@ body {
 }
 
 #scattergraph {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+
+  background-color: white;
+  @include prefix("box-shadow", "0px 10px 40px -15px rgba(0,0,0,0.75)");
+
+  padding: 1em;
+  @include prefix("transform", "translate(-50%, -50%)");
+
   #title {
     font-size: 2em;
     font-weight: bold;
@@ -95,5 +105,9 @@ body {
 
   svg {
     border: 5px blue solid;
+
+    .dot {
+      border: 1px red solid;
+    }
   }
 }
