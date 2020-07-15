@@ -51,10 +51,15 @@ body {
 }
 
 #scattergraph svg {
-  border: 5px blue solid;
+  border: 0px blue solid;
 }
 
 #scattergraph svg .dot {
-  border: 1px red solid;
+  stroke: black;
+  stroke-width: 1px;
+}
+
+#scattergraph svg #legend {
+  fill: black;
 }
 /*# sourceMappingURL=main.css.map */

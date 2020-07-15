@@ -6,6 +6,54 @@ import * as d3 from "d3";
 const JSON_URL =
   "https://raw.githubusercontent.com/freeCodeCamp/ProjectReferenceData/master/cyclist-data.json";
 
+/*
+ * Converts a string in the time format (mm:ss) and returns a new Date object
+ *
+ * @param time - string in the time format (mm:ss)
+ */
+const convertTimeToDate = (time) => {
+  const index = time.indexOf(":");
+  const minutes = time.substring(0, index);
+  const seconds = time.substring(index + 1);
+
+  return new Date(1970, 0, 1, 0, minutes, seconds);
+};
+
+/*
+ * Converts a year to a Date object
+ *
+ * @param year - integer type of the year value
+ */
+const convertYearToDate = (year) => {
+  return new Date(year, 0, 1, 0, 0, 0);
+};
+
+/*
+ * Finds out which bikers doped or did not doped
+ *
+ * @param bikedData - biked data of racers
+ * @param flag - true results in research for those who doped, false otherwise
+ */
+const didDope = (bikedData, flag = true) => {
+  let count = 0;
+
+  if (flag) {
+    bikedData.forEach((d) => {
+      if (d.Doping.length > 0) {
+        count++;
+      }
+    });
+  } else {
+    bikedData.forEach((d) => {
+      if (d.Doping.length <= 0) {
+        count++;
+      }
+    });
+  }
+
+  return count;
+};
+
 function App() {
   const [data, setBikeRaceData] = useState([]);
 
@@ -37,9 +85,12 @@ function App() {
             Nationality: e.Nationality,
             Doping: e.Doping,
             URL: e.URL,
+            TimeToDate: convertTimeToDate(e.Time),
+            YearToDate: convertYearToDate(e.Year),
           });
         });
-        console.log(newData);
+
+        console.log(didDope(bikedData, false));
 
         setBikeRaceData(() => newData);
       }
@@ -81,12 +132,34 @@ function ScatterPlot({ data }) {
    * @param bikeddata - "Time", "Place", "Seconds", "Name", "Year",  "Nationality", "Doping", "URL"
    */
   const drawScatterGraph = (bikedata) => {
-    const width = 700;
-    const height = 500;
-    const padding = 25;
-    const xFactor = 5;
-    const radius = 2;
+    // Settings
+    const padding = {
+      top: 50,
+      right: 25,
+      bottom: 50,
+      left: 25,
+    };
+    const width = 700 + padding.left + padding.right;
+    const height = 300 + padding.top + padding.bottom;
+    const xAxisFactor = {
+      top: 0,
+      right: 7,
+      bottom: 0,
+      left: 3,
+    };
+    const yAxisFactor = {
+      top: 0,
+      right: 0,
+      bottom: 0,
+      left: 0,
+    };
+    const radius = 5;
+    const dopeColor = d3.schemeCategory10[1];
+    const nonDopeColor = d3.schemeCategory10[0];
+    const dopedBikers = didDope(bikedata, true);
+    const nonDopedBikers = didDope(bikedata, false);
 
+    // Setting up graph
     d3.select("#scattergraph")
       .append("div")
       .attr("id", "title")
@@ -102,20 +175,24 @@ function ScatterPlot({ data }) {
       .attr("width", width)
       .attr("height", height);
 
-    // scales
+    // Scale x-axis year
     const xScale = d3.scaleLinear();
     xScale.domain([
-      d3.min(bikedata, (d) => d.Year - xFactor),
-      d3.max(bikedata, (d) => d.Year + xFactor),
+      d3.min(bikedata, (d) => d.YearToDate.getFullYear()),
+      d3.max(bikedata, (d) => d.YearToDate.getFullYear()),
     ]);
-    xScale.range([padding, width - padding]);
+    xScale.range([
+      padding.left * xAxisFactor.left,
+      width - padding.right * xAxisFactor.right,
+    ]);
 
+    // Scale y-axis minutes
     const yScale = d3.scaleLinear();
     yScale.domain([
-      d3.min(bikedata, (d) => parseFloat(d.Time)),
-      d3.max(bikedata, (d) => parseFloat(d.Time)),
+      d3.min(bikedata, (d) => d.TimeToDate),
+      d3.max(bikedata, (d) => d.TimeToDate),
     ]);
-    yScale.range([height - padding, padding]);
+    yScale.range([height - padding.bottom, padding.top]);
 
     svg
       .selectAll("circle")
@@ -123,31 +200,49 @@ function ScatterPlot({ data }) {
       .enter()
       .append("circle")
       .attr("class", "dot")
-      .attr("cx", (d) => xScale(d.Year))
-      .attr("cy", (d) => yScale(parseFloat(d.Time)))
-      .attr("r", (d) => radius);
+      .attr("cx", (d) => xScale(d.YearToDate.getFullYear()))
+      .attr("cy", (d) => yScale(d.TimeToDate))
+      .attr("r", (d) => radius)
+      .attr("data-xvalue", (d) => d.YearToDate.getFullYear())
+      .attr("data-yvalue", (d) => d.TimeToDate)
 
-    // x-axis
+      .style("fill", (d) => (d.Doping.length > 0 ? nonDopeColor : dopeColor));
+
+    // X-axis
     const xAxis = d3.axisBottom(xScale).tickFormat(d3.format("d"));
     svg
       .append("g")
       .attr("id", "x-axis")
-      .attr(
-        "transform",
-        "translate(" + padding + "," + (height - 2 * padding) + ")"
-      )
+      .attr("transform", "translate(0," + (height - padding.bottom) + ")")
       .call(xAxis);
 
-    // y-axis
-    const yAxis = d3.axisLeft(yScale).tickFormat(d3.format(".2f"));
+    // Y-axis
+    const yAxis = d3.axisLeft(yScale).tickFormat(d3.timeFormat("%M:%S "));
     svg
       .append("g")
       .attr("id", "y-axis")
-      .attr(
-        "transform",
-        "translate(" + 2 * padding + "  ," + -1 * padding + ")"
-      )
+      .attr("transform", "translate(" + padding.left * xAxisFactor.left + ",0)")
       .call(yAxis);
+
+    svg
+      .append("text")
+      .style("font-size", "0.75em")
+      .attr("id", "y-axis-title")
+      .attr("x", width / 2)
+      .attr("y", -1 * (xAxisFactor.left + xAxisFactor.left) * padding.left)
+      .style("text-anchor", "middle")
+      .attr("transform", "rotate(-90," + width / 2 + "," + height / 2 + ")")
+      .text("Time (MM:SS)");
+
+    // Legend
+    let legendContainer = svg
+      .append("g")
+      .attr("id", "legend")
+      .attr("width", 100)
+      .attr("height", 100)
+      .attr("x", width / 2)
+      .attr("y", height / 2)
+      .text("testing");
   };
 
   return (

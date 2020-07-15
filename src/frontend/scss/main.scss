@@ -104,10 +104,15 @@ body {
   }
 
   svg {
-    border: 5px blue solid;
+    border: 0px blue solid;
 
     .dot {
-      border: 1px red solid;
+      stroke: black;
+      stroke-width: 1px;
+    }
+
+    #legend {
+      fill: black;
     }
   }
 }
