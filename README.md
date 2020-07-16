@@ -47,6 +47,7 @@ You don’t have to ever use `eject`. The curated feature set is suitable for sm
 
 - [Bootstrap](http://www.dropwizard.io/1.0.2/docs/) - The CSS framework
 - [React](https://reactjs.org/) - JavaScript library
+- [Data-Drive Documents](https://d3js.org/) - JavaScript library for producing dynamic, interactive data visualizations in web browsers
 
 ## Authors
 
