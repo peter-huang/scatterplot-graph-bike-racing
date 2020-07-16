@@ -326,7 +326,7 @@ function ScatterPlot({ data }) {
       .attr("font-size", "0.75em")
       .attr("x", padding.right * 1.5)
       .attr("y", padding.bottom / 3)
-      .text("No doping [" + didDope(bikedata, true) + "]");
+      .text("Yes doping [" + didDope(bikedata, true) + "]");
 
     legendContainer
       .append("text")
@@ -334,7 +334,7 @@ function ScatterPlot({ data }) {
       .attr("font-size", "0.75em")
       .attr("x", padding.right * 1.5)
       .attr("y", padding.bottom + padding.bottom / 3)
-      .text("Yes doping [" + didDope(bikedata, false) + "]");
+      .text("No doping [" + didDope(bikedata, false) + "]");
   };
 
   return (
