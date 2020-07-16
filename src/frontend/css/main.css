@@ -21,6 +21,21 @@ body {
   color: #d00000;
 }
 
+#tooltip {
+  position: absolute;
+  z-index: 9999;
+  background-color: #4a4e69;
+  font-size: 0.75em;
+  color: white;
+  padding: 0.5em;
+  border-radius: 0.5em;
+  text-align: left;
+  opacity: 0.9;
+  -ms-box-shadow: 2px 2px 10px 0px rgba(0,0,0,0.75);
+  -o-box-shadow: 2px 2px 10px 0px rgba(0,0,0,0.75);
+  box-shadow: 2px 2px 10px 0px rgba(0,0,0,0.75);
+}
+
 #scattergraph-container {
   position: relative;
   border: 5px purple solid;

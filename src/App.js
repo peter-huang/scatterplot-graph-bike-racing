@@ -54,6 +54,21 @@ const didDope = (bikedData, flag = true) => {
   return count;
 };
 
+/*
+ * Returns the cx and cy location of the biker data
+ *
+ * @param bikedData - array of bike data
+ * @param index - index of biker data array
+ * @param xScale - x-axis scale
+ * @param yScale - y-axis scale
+ */
+const getCirclePos = (bikedData, index, xScale, yScale) => {
+  return {
+    cx: xScale(bikedData[index].YearToDate.getFullYear()),
+    cy: yScale(bikedData[index].TimeToDate),
+  };
+};
+
 function App() {
   const [data, setBikeRaceData] = useState([]);
 
@@ -89,8 +104,6 @@ function App() {
             YearToDate: convertYearToDate(e.Year),
           });
         });
-
-        console.log(didDope(bikedData, false));
 
         setBikeRaceData(() => newData);
       }
@@ -139,8 +152,8 @@ function ScatterPlot({ data }) {
       bottom: 50,
       left: 25,
     };
-    const width = 700 + padding.left + padding.right;
-    const height = 300 + padding.top + padding.bottom;
+    const width = 800 + padding.left + padding.right;
+    const height = 400 + padding.top + padding.bottom;
     const xAxisFactor = {
       top: 0,
       right: 7,
@@ -150,9 +163,10 @@ function ScatterPlot({ data }) {
     const yAxisFactor = {
       top: 0,
       right: 0,
-      bottom: 0,
+      bottom: 2.5,
       left: 0,
     };
+    const yearFactor = 1;
     const radius = 5;
     const dopeColor = d3.schemeCategory10[1];
     const nonDopeColor = d3.schemeCategory10[0];
@@ -175,11 +189,18 @@ function ScatterPlot({ data }) {
       .attr("width", width)
       .attr("height", height);
 
+    // Tooltip
+    let tooltip = d3
+      .select("#body")
+      .append("div")
+      .attr("id", "tooltip")
+      .attr("style", "position: absolute; opacity: 0;");
+
     // Scale x-axis year
     const xScale = d3.scaleLinear();
     xScale.domain([
-      d3.min(bikedata, (d) => d.YearToDate.getFullYear()),
-      d3.max(bikedata, (d) => d.YearToDate.getFullYear()),
+      d3.min(bikedata, (d) => d.YearToDate.getFullYear() - yearFactor),
+      d3.max(bikedata, (d) => d.YearToDate.getFullYear() + yearFactor),
     ]);
     xScale.range([
       padding.left * xAxisFactor.left,
@@ -205,8 +226,42 @@ function ScatterPlot({ data }) {
       .attr("r", (d) => radius)
       .attr("data-xvalue", (d) => d.YearToDate.getFullYear())
       .attr("data-yvalue", (d) => d.TimeToDate)
+      .style("stroke-width", 2)
+      .style("fill", (d) => (d.Doping.length > 0 ? nonDopeColor : dopeColor))
+      .on("mouseover", (d, i) => {})
+      .on("mousemove", (d, i) => {
+        let content =
+          d.Name +
+          ": " +
+          d.Nationality +
+          "<br />" +
+          "Year: " +
+          d.Year +
+          ", " +
+          "Time: " +
+          d.TimeToDate.getMinutes() +
+          ":" +
+          d.TimeToDate.getSeconds() +
+          "<br />" +
+          d.Doping;
 
-      .style("fill", (d) => (d.Doping.length > 0 ? nonDopeColor : dopeColor));
+        tooltip.transition().duration(100).style("opacity", 0.9);
+        let pos = d3
+          .select(document.getElementsByClassName("dot")[i])
+          .node()
+          .getBoundingClientRect();
+        let x = pos.x - window.pageXOffset + 10 + "px";
+        let y = pos.y - window.pageYOffset + 10 + "px";
+        tooltip
+          .html(content)
+          .style("left", x)
+          .style("top", y)
+          .style("opacity", 0.9)
+          .attr("data-year", d.YearToDate.getFullYear());
+      })
+      .on("mouseout", (d, i) => {
+        tooltip.transition().duration(100).style("opacity", 0);
+      });
 
     // X-axis
     const xAxis = d3.axisBottom(xScale).tickFormat(d3.format("d"));
@@ -238,11 +293,48 @@ function ScatterPlot({ data }) {
     let legendContainer = svg
       .append("g")
       .attr("id", "legend")
-      .attr("width", 100)
-      .attr("height", 100)
-      .attr("x", width / 2)
-      .attr("y", height / 2)
-      .text("testing");
+
+      .attr(
+        "transform",
+        "translate(" +
+          (width - (xAxisFactor.right - 1) * padding.right) +
+          "," +
+          height / 2 +
+          ")"
+      );
+
+    legendContainer
+      .append("rect")
+      .attr("width", padding.right)
+      .attr("height", padding.right)
+      .style("fill", nonDopeColor)
+      .style("stroke-width", 2)
+      .style("stroke", "black");
+
+    legendContainer
+      .append("rect")
+      .attr("width", padding.right)
+      .attr("height", padding.right)
+      .attr("y", padding.bottom)
+      .style("fill", dopeColor)
+      .style("stroke-width", 2)
+      .style("stroke", "black");
+
+    legendContainer
+      .append("text")
+      .attr("id", "legend-dope")
+      .attr("font-size", "0.75em")
+      .attr("x", padding.right * 1.5)
+      .attr("y", padding.bottom / 3)
+      .text("No doping [" + didDope(bikedata, true) + "]");
+
+    legendContainer
+      .append("text")
+      .attr("id", "legend-dope")
+      .attr("font-size", "0.75em")
+      .attr("x", padding.right * 1.5)
+      .attr("y", padding.bottom + padding.bottom / 3)
+      .text("Yes doping [" + didDope(bikedata, false) + "]");
   };
 
   return (
