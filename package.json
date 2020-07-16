@@ -1,5 +1,6 @@
 {
   "name": "scatterplot-graph-bike-racing",
+  "homepage": "https://www.peterhuang.net/projects/scatterplot-graph-bike-racing/",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
